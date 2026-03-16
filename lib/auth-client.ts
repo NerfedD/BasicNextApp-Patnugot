@@ -1,11 +1,11 @@
 // lib/auth-client.ts
 import { createAuthClient } from "better-auth/react"; 
 import { inferAdditionalFields } from "better-auth/client/plugins";
-// Note: Only import types from lib/auth.ts to avoid "Unexpected token 'export'" errors
-import type { AuthOptions } from "./auth"; 
+// FIX: Import ONLY from the new types file
+import type { AuthOptions } from "./auth-types"; 
 
 export const authClient = createAuthClient({
-    // FIX: Prioritize window.location.origin to prevent CORS/Fetch errors on Vercel
+    // FIX: Always use current window origin in the browser
     baseURL: typeof window !== "undefined" 
         ? window.location.origin 
         : (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
