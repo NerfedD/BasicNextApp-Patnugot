@@ -4,14 +4,14 @@
 # Host aws-1-ap-northeast-1.pooler.supabase.com accepts the user postgres.ishuzczufkhdpnmseicj
 #---------supabase connection----------
 #---school account----
-DB_HOST=aws-1-ap-northeast-1.pooler.supabase.com
-DB_PORT=5432
-DB_USER=postgres.kemsyojuismecsgefnox
-DB_PASSWORD=KRRw90ds9QNP2IMZ
-DB_NAME=postgres
+#DB_HOST=aws-1-ap-south-1.pooler.supabase.com
+#DB_PORT=5432
+#DB_USER=postgres.gqhgcfofwpjvpsjdzhth
+#DB_PASSWORD=ww3Jd6TPh94rl3PT
+#DB_NAME=postgres
 
 # Fallback (optional, can be used if needed but preferred above)
-DATABASE_URL=postgresql://postgres:[KRRw90ds9QNP2IMZ]@db.kemsyojuismecsgefnox.supabase.co:5432/postgres
+# DATABASE_URL=postgresql://postgres:1024Roy!%231940@db.ishuzczufkhdpnmseicj.supabase.co:5432/postgres
 
 #-------- Local host connection ---------
 DB_HOST=localhost
@@ -28,8 +28,8 @@ BETTER_AUTH_URL=http://localhost:3000
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 #---vercel-----
-BETTER_AUTH_URL=https://basic-next-app-patnugot.vercel.app
-NEXT_PUBLIC_APP=https://basic-next-app-patnugot.vercel.app
+#BETTER_AUTH_URL=https://basicnextapp.vercel.app
+#NEXT_PUBLIC_APP=https://basicnextapp.vercel.app
 
 # Session
 SESSION_TIMEOUT_VALUE=2 hours
