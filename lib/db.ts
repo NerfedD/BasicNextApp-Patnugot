@@ -9,20 +9,21 @@ const sslConfig = process.env.DB_HOST === 'localhost' ? false : {
   rejectUnauthorized: false,
 };
 
+// lib/db.ts
 const connectionConfig = {
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT || 5432),
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: sslConfig,
-  // CRITICAL FOR VERCEL/SUPABASE:
-  // Transaction mode (port 6543) doesn't support many concurrent connections
-  max: isServerless ? 1 : 10, 
-  idleTimeoutMillis: 10000,
+  // Fix: Explicitly handle Supabase SSL requirements
+  ssl: process.env.DB_HOST === 'localhost' ? false : {
+    rejectUnauthorized: false, 
+  },
+  max: isServerless ? 1 : 10,
   connectionTimeoutMillis: 10000,
-  // Add this to prevent hanging on network issues
-  query_timeout: 10000, 
+  // Fix: Add a statement timeout to prevent 500 errors from hanging
+  statement_timeout: 10000, 
 };
 
 const useExplicitConfig = process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASSWORD;
