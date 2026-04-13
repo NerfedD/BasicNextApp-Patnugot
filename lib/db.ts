@@ -14,7 +14,9 @@ const getBaseURL = () => {
 };
 
 export const authOptions = {
-    database: pool,
+    // FIX: Cast as any to bypass the TypeScript mismatch between @types/pg 
+    // and better-auth's expected Kysely options. The pg Pool is perfectly valid at runtime.
+    database: pool as any,
     user: { 
         modelName: "users",
         additionalFields: {
