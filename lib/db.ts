@@ -1,68 +1,38 @@
-import { Pool, PoolClient, QueryResultRow, QueryResult } from 'pg';
+// lib/auth.ts
+import { betterAuth, BetterAuthOptions } from "better-auth";
+import { bearer } from "better-auth/plugins";
+import { pool } from "./db";
 
-const globalForPool = global as unknown as { pool: Pool };
-
-const isServerless = process.env.VERCEL === '1';
-
-// Base SSL configuration - Supabase REQUIRES SSL for remote connections
-const sslConfig = process.env.DB_HOST === 'localhost' ? false : {
-  rejectUnauthorized: false,
+// Dynamically resolve the base URL for Vercel environments
+const getBaseURL = () => {
+    if (process.env.BETTER_AUTH_URL) return process.env.BETTER_AUTH_URL;
+    if (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`;
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+    return process.env.NODE_ENV === 'production' 
+        ? 'https://basic-next-app-patnugot.vercel.app' 
+        : 'http://localhost:3000';
 };
 
-// lib/db.ts
-const connectionConfig = {
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT || 5432),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  // Fix: Explicitly handle Supabase SSL requirements
-  ssl: process.env.DB_HOST === 'localhost' ? false : {
-    rejectUnauthorized: false, 
-  },
-  max: isServerless ? 1 : 10,
-  connectionTimeoutMillis: 10000,
-  // Fix: Add a statement timeout to prevent 500 errors from hanging
-  statement_timeout: 10000, 
-};
+export const authOptions = {
+    database: pool,
+    user: { 
+        modelName: "users",
+        additionalFields: {
+            active: { type: "boolean" },
+        },
+    },
+    session: { modelName: "sessions" },
+    account: { modelName: "accounts" },
+    verification: { modelName: "verifications" },
+    emailAndPassword: { enabled: true },
+    plugins: [bearer()],
+    secret: process.env.BETTER_AUTH_SECRET,
+    baseURL: getBaseURL(), 
+    trustedOrigins: [
+        "http://localhost:3000",
+        "https://basic-next-app-patnugot.vercel.app",
+        "https://*.vercel.app" 
+    ],
+} satisfies BetterAuthOptions;
 
-const useExplicitConfig = process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASSWORD;
-
-const finalConfig = useExplicitConfig
-  ? connectionConfig 
-  : { 
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
-      max: isServerless ? 1 : 10,
-      idleTimeoutMillis: 10000,
-      connectionTimeoutMillis: 10000,
-    };
-
-// LOGGING: Check your Vercel logs for this line to verify variables are present
-console.log(`[DB Config] Host=${process.env.DB_HOST || 'via-url'}, SSL=${!!finalConfig.ssl}, Max=${finalConfig.max}`);
-
-export const pool = globalForPool.pool || new Pool(finalConfig);
-
-if (process.env.NODE_ENV !== 'production') globalForPool.pool = pool;
-
-pool.on('error', (err) => {
-  console.error('[DB Error] Pool error:', err);
-});
-
-export const query = async <T extends QueryResultRow = QueryResultRow>(
-  text: string, 
-  params?: unknown[]
-): Promise<QueryResult<T>> => {
-  // IMPORTANT: For Supabase Transaction Mode (port 6543), 
-  // you must disable prepared statements if you use DATABASE_URL.
-  // We do this by ensuring the query is sent as a simple string.
-  try {
-    return await pool.query<T>(text, params);
-  } catch (error: any) {
-    if (error.message?.includes('Connection terminated') || error.code === '57P01') {
-      console.warn('⚠️ DB Connection terminated, retrying...');
-      return await pool.query<T>(text, params);
-    }
-    throw error;
-  }
-};
+export const auth = betterAuth(authOptions);

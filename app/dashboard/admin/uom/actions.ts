@@ -1,4 +1,5 @@
 "use server";
+
 import { query } from "@/lib/db";
 
 export interface UOM {
@@ -8,6 +9,11 @@ export interface UOM {
 }
 
 export async function getUOMs(): Promise<UOM[]> {
-  const { rows } = await query<UOM>('SELECT * FROM uom ORDER BY name ASC');
-  return rows;
+  try {
+    const { rows } = await query<UOM>('SELECT * FROM uom ORDER BY name ASC');
+    return rows;
+  } catch (error) {
+    console.error("[DB Error] Failed to fetch UOMs:", error);
+    throw new Error("Failed to fetch Units of Measure.");
+  }
 }
