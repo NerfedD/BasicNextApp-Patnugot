@@ -11,15 +11,13 @@ const connectionConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: process.env.DB_HOST && process.env.DB_HOST.includes('localhost') ? false : {
-    rejectUnauthorized: false, 
+  ssl: process.env.DB_HOST === 'localhost' ? false : {
+    rejectUnauthorized: false, // Required for Supabase remote connections
   },
-  // Optimize for serverless: use fewer connections per instance to avoid exhaustion
-  max: isServerless ? 1 : 10, // Reduce max connections to 1 for Vercel to avoid "too many clients"
-  idleTimeoutMillis: 10000, // Close idle clients faster (10s) to avoid "Connection terminated" on stale connections
-  // Allow slightly longer for initial connection in production
-  connectionTimeoutMillis: isServerless ? 10000 : 5000,
-  keepAlive: true, // Enable TCP keepalive
+  // Use a timeout to prevent the 500 error from hanging indefinitely
+  connectionTimeoutMillis: 10000,
+  
+  
 };
 
 // Fallback to connection string if individual vars are missing but DATABASE_URL is present
