@@ -221,7 +221,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   { label: "Medical Tests", onClick: () => router.push("/dashboard/admin/medical-tests") },
   { label: "Units of Measure", onClick: () => router.push("/dashboard/admin/uom") },
   { label: "Test Categories", onClick: () => router.push("/dashboard/admin/categories") },
-  ];
+];
 
   const handleTimeoutLogout = async () => {
     await signOut();

@@ -7,18 +7,20 @@ export interface MedicalTest {
   name: string;
   category_name: string;
   uom_name: string;
-  idcategory: string;
-  iduom: string;
   normalmin: number;
   normalmax: number;
 }
 
 export async function getMedicalTests(): Promise<MedicalTest[]> {
+  // Requirement C: Use SQL Join to show UOM Name and Category Name
   const sql = `
     SELECT 
-      mt.id, mt.name, mt.normalmin, mt.normalmax,
-      tc.name AS category_name, tc.id AS idcategory,
-      u.name AS uom_name, u.id AS iduom
+      mt.id, 
+      mt.name, 
+      tc.name AS category_name, 
+      u.name AS uom_name, 
+      mt.normalmin, 
+      mt.normalmax
     FROM medicaltests mt
     JOIN testcategories tc ON mt.idcategory = tc.id
     JOIN uom u ON mt.iduom = u.id
@@ -27,5 +29,3 @@ export async function getMedicalTests(): Promise<MedicalTest[]> {
   const { rows } = await query<MedicalTest>(sql);
   return rows;
 }
-
-// Additional actions for UOM and Categories would follow a similar pattern
